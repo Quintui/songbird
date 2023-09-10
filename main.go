@@ -5,6 +5,7 @@ import (
 	"log"
 	"os"
 	"os/signal"
+	"strings"
 	"syscall"
 
 	"github.com/bwmarrin/discordgo"
@@ -33,17 +34,24 @@ func main() {
 }
 
 func handleMessage(s *discordgo.Session, m *discordgo.MessageCreate) {
+	commandPrefix := config.Get().CommandPrefix
+	message := m.Content
 
 	if m.Author.ID == s.State.User.ID {
 		return
 	}
 
-	if m.Content == "$ping" {
-		s.ChannelMessageSend(m.ChannelID, "pong")
-	}
+	if strings.HasPrefix(message, commandPrefix) {
+		command := strings.Replace(strings.Split(message, " ")[0], commandPrefix, "", 1)
 
-	if m.Content == "$pong" {
-		s.ChannelMessageSend(m.ChannelID, "ping")
-	}
+		switch command {
+		case "ping":
+			s.ChannelMessageSend(m.ChannelID, "Pong")
 
+		case "pong":
+			s.ChannelMessageSend(m.ChannelID, "Ping")
+
+		}
+
+	}
 }
