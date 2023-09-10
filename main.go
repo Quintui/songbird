@@ -8,41 +8,20 @@ import (
 	"syscall"
 
 	"github.com/bwmarrin/discordgo"
-	"github.com/joho/godotenv"
+	"github.com/quintui/songbird/internal/config"
 )
 
 func main() {
-	err := godotenv.Load()
+
+	config.Load()
+
+	ds, err := connect(config.Get().AccessToken)
 
 	if err != nil {
-		log.Fatal("Error loading .env file", err)
-		return
-	}
-
-	accessToken := os.Getenv("ACCESS_TOKEN")
-
-	if accessToken == "" {
-		log.Fatal("ACCESS_TOKEN not set")
-		return
-	}
-
-	ds, err := discordgo.New("Bot " + accessToken)
-
-	if err != nil {
-		fmt.Println(err)
-		return
+		log.Fatalf("Something went wrong connecting to Discord: %s", err)
 	}
 
 	ds.AddHandler(handleMessage)
-
-	ds.Identify.Intents = discordgo.IntentsGuildMessages
-
-	err = ds.Open()
-	if err != nil {
-
-		log.Fatal("Error opening connection", err)
-		return
-	}
 
 	// Wait here until CTRL-C or other term signal is received.
 	fmt.Println("Bot is now running.  Press CTRL-C to exit.")
