@@ -7,6 +7,9 @@ github.com/gorilla/websocket
 # github.com/joho/godotenv v1.5.1
 ## explicit; go 1.12
 github.com/joho/godotenv
+# github.com/wader/goutubedl v0.0.0-20230907161040-fcb3278031e3
+## explicit; go 1.12
+github.com/wader/goutubedl
 # golang.org/x/crypto v0.0.0-20210421170649-83a5a9bb288b
 ## explicit; go 1.11
 golang.org/x/crypto/internal/subtle
