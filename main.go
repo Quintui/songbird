@@ -1,7 +1,6 @@
 package main
 
 import (
-	"context"
 	"fmt"
 	"log"
 	"os"
@@ -11,7 +10,6 @@ import (
 
 	"github.com/bwmarrin/discordgo"
 	"github.com/quintui/songbird/internal/config"
-	"github.com/wader/goutubedl"
 )
 
 func main() {
@@ -43,12 +41,20 @@ func handleMessage(s *discordgo.Session, m *discordgo.MessageCreate) {
 	}
 
 	if strings.HasPrefix(message, commandPrefix) {
+
 		command := strings.Replace(strings.Split(message, " ")[0], commandPrefix, "", 1)
-		query := strings.Replace(strings.Split(message, " ")[1], commandPrefix, "", 1)
 
 		switch command {
 		case "play", "yt", "youtube":
-			handleYoutubeCommand(m, query)
+			var query string
+			fmt.Print(len(strings.Split(message, " ")))
+			if splittedMessage := strings.Split(message, " "); len(splittedMessage) < 2 {
+				s.ChannelMessageSend(m.ChannelID, fmt.Sprintf("@%s Bimbo... It looks like you forgot to put a LINK.", m.Author.Username))
+				return
+			}
+			query = strings.Replace(strings.Split(message, " ")[1], commandPrefix, "", 1)
+
+			handleYoutubeCommand(s, m, query)
 
 		case "pong":
 			s.ChannelMessageSend(m.ChannelID, "Ping")
@@ -56,27 +62,4 @@ func handleMessage(s *discordgo.Session, m *discordgo.MessageCreate) {
 		}
 
 	}
-}
-
-func handleYoutubeCommand(session *discordgo.Session, message *discordgo.MessageCreate, query string) {
-	session.ChannelMessageSend(message.ChannelID, "l")
-
-	youtubeOptions := goutubedl.Options{}
-
-	searchResult, err := goutubedl.New(context.Background(), query, youtubeOptions)
-
-	if err != nil {
-		session.ChannelMessageSend(message.ChannelID, fmt.Sprintf("Oopsie @%s, Something went wrong with getting the video. URL: %s ", message.Author.Username, query))
-		return
-	}
-
-	session.ChannelMessageSend(message.ChannelID, fmt.Sprintf("Hey, @%s, I found you video!!! %s", message.Author.Username))
-
-	_, err = searchResult.Download(context.Background(), "")
-
-	if err != nil {
-		session.ChannelMessageSend(message.ChannelID, fmt.Sprintf("Oopsie @%s, Something went wrong with downloading the video. URL: %s ", message.Author.Username, query))
-		return
-	}
-
 }
