@@ -32,32 +32,30 @@ func main() {
 	ds.Close()
 }
 
-func handleMessage(s *discordgo.Session, m *discordgo.MessageCreate) {
+func handleMessage(session *discordgo.Session, message *discordgo.MessageCreate) {
 	commandPrefix := config.Get().CommandPrefix
-	message := m.Content
+	messageContent := message.Content
 
-	if m.Author.ID == s.State.User.ID {
+	if message.Author.ID == session.State.User.ID {
 		return
 	}
 
-	if strings.HasPrefix(message, commandPrefix) {
+	if strings.HasPrefix(messageContent, commandPrefix) {
 
-		command := strings.Replace(strings.Split(message, " ")[0], commandPrefix, "", 1)
-
+		command := strings.Replace(strings.Split(messageContent, " ")[0], commandPrefix, "", 1)
 		switch command {
 		case "play", "yt", "youtube":
 			var query string
-			fmt.Print(len(strings.Split(message, " ")))
-			if splittedMessage := strings.Split(message, " "); len(splittedMessage) < 2 {
-				s.ChannelMessageSend(m.ChannelID, fmt.Sprintf("@%s Bimbo... It looks like you forgot to put a LINK.", m.Author.Username))
+			if splittedMessage := strings.Split(messageContent, " "); len(splittedMessage) < 2 {
+				session.ChannelMessageSend(message.ChannelID, fmt.Sprintf("@%s Bimbo... It looks like you forgot to put a LINK.", message.Author.Username))
 				return
 			}
-			query = strings.Replace(strings.Split(message, " ")[1], commandPrefix, "", 1)
+			query = strings.Replace(strings.Split(messageContent, " ")[1], commandPrefix, "", 1)
 
-			handleYoutubeCommand(s, m, query)
+			handleYoutubeCommand(session, message, query)
 
 		case "pong":
-			s.ChannelMessageSend(m.ChannelID, "Ping")
+			session.ChannelMessageSend(message.ChannelID, "Ping")
 
 		}
 
