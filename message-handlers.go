@@ -1,17 +1,73 @@
 package main
 
 import (
-	"context"
 	"errors"
 	"fmt"
+	"io"
+	"log"
+	"net/url"
+	"os"
 
+	"github.com/bwmarrin/dgvoice"
 	"github.com/bwmarrin/discordgo"
-	"github.com/wader/goutubedl"
+	"github.com/kkdai/youtube/v2"
 )
+
+type youtubeSong struct {
+	URL string
+}
+
+func (ys *youtubeSong) downloadVideo() (string, error) {
+
+	client := youtube.Client{}
+	parsedURL, err := url.Parse(ys.URL)
+	if err != nil {
+		log.Printf("Unable to decode url: %s, err: %v", ys.URL, err)
+		return "", err
+	}
+
+	videoID := parsedURL.Query().Get("v")
+	youtubeVideo, err := client.GetVideo(videoID)
+
+	if err != nil {
+		fmt.Println(err)
+		return "", err
+	}
+
+	formats := youtubeVideo.Formats.WithAudioChannels()
+
+	stream, _, err := client.GetStream(youtubeVideo, &formats[0])
+	if err != nil {
+		fmt.Println(err)
+		return "", err
+	}
+
+	fileName := fmt.Sprintf("%s.mp4", videoID)
+
+	file, err := os.Create(fileName)
+
+	if err != nil {
+		fmt.Println(err)
+		return "", err
+	}
+	defer file.Close()
+
+	_, err = io.Copy(file, stream)
+
+	if err != nil {
+		fmt.Println(err)
+		return "", err
+	}
+
+	return fileName, nil
+}
 
 func handleYoutubeCommand(session *discordgo.Session, message *discordgo.MessageCreate, query string) {
 	messageAuthor := message.Author
 	channel, err := session.State.Channel(message.ChannelID)
+	youtubeSong := youtubeSong{
+		URL: query,
+	}
 
 	if err != nil {
 		fmt.Println(err)
@@ -34,6 +90,15 @@ func handleYoutubeCommand(session *discordgo.Session, message *discordgo.Message
 		return
 	}
 
+	downloadedSong, err := youtubeSong.downloadVideo()
+
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+
+	defer os.Remove(downloadedSong)
+
 	voiceConnection, err := session.ChannelVoiceJoin(currentChannel.GuildID, currentChannel.ID, false, true)
 
 	if err != nil {
@@ -42,30 +107,18 @@ func handleYoutubeCommand(session *discordgo.Session, message *discordgo.Message
 		return
 	}
 
+	voiceConnection.Speaking(true)
+
+	dgvoice.PlayAudioFile(voiceConnection, downloadedSong, make(chan bool))
+
 	defer voiceConnection.Close()
 
-	youtubeOptions := goutubedl.Options{}
-
-	searchResult, err := goutubedl.New(context.Background(), query, youtubeOptions)
-
-	if err != nil {
-		session.ChannelMessageSend(message.ChannelID, fmt.Sprintf("Oopsie @%s, Something went wrong with getting the video. URL: %s ", message.Author.Username, query))
-		return
-	}
-
 	session.ChannelMessageSend(message.ChannelID, fmt.Sprintf("Hey, @%s, I found you video!!! %s", message.Author.Username, query))
-	//
-	downloadedVideo, err := searchResult.Download(context.Background(), "")
-
-	// downloadedVideo.Read()
 
 	if err != nil {
 		session.ChannelMessageSend(message.ChannelID, fmt.Sprintf("Oopsie @%s, Something went wrong with downloading the video. URL: %s ", message.Author.Username, query))
 		return
 	}
-
-	defer downloadedVideo.Close()
-	//
 }
 
 func getCurrentChannel(user *discordgo.User, guild *discordgo.Guild, session *discordgo.Session) (*discordgo.Channel, error) {
@@ -81,9 +134,7 @@ func getCurrentChannel(user *discordgo.User, guild *discordgo.Guild, session *di
 			return channel, nil
 
 		}
-		return nil, errors.New("There is no user in voice channels ")
-
 	}
 
-	return nil, nil
+	return nil, errors.New("there is no user in voice channels ")
 }

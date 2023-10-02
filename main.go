@@ -54,9 +54,6 @@ func handleMessage(session *discordgo.Session, message *discordgo.MessageCreate)
 
 			handleYoutubeCommand(session, message, query)
 
-		case "pong":
-			session.ChannelMessageSend(message.ChannelID, "Ping")
-
 		}
 
 	}
