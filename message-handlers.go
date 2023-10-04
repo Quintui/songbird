@@ -65,15 +65,16 @@ func (ys *youtubeSong) downloadVideo() (string, error) {
 func handleYoutubeCommand(session *discordgo.Session, message *discordgo.MessageCreate, query string) {
 	messageAuthor := message.Author
 	channel, err := session.State.Channel(message.ChannelID)
-	youtubeSong := youtubeSong{
-		URL: query,
-	}
-
 	if err != nil {
 		fmt.Println(err)
 		session.ChannelMessageSend(message.ChannelID, fmt.Sprintln("Error with getting a message channel"))
 		return
 	}
+
+	youtubeSong := youtubeSong{
+		URL: query,
+	}
+
 	guild, err := session.State.Guild(channel.GuildID)
 
 	if err != nil {
@@ -109,16 +110,12 @@ func handleYoutubeCommand(session *discordgo.Session, message *discordgo.Message
 
 	voiceConnection.Speaking(true)
 
+	session.ChannelMessageSend(message.ChannelID, fmt.Sprintf("Hey, @%s, I found you video!!! %s", message.Author.Username, query))
+
 	dgvoice.PlayAudioFile(voiceConnection, downloadedSong, make(chan bool))
 
 	defer voiceConnection.Close()
 
-	session.ChannelMessageSend(message.ChannelID, fmt.Sprintf("Hey, @%s, I found you video!!! %s", message.Author.Username, query))
-
-	if err != nil {
-		session.ChannelMessageSend(message.ChannelID, fmt.Sprintf("Oopsie @%s, Something went wrong with downloading the video. URL: %s ", message.Author.Username, query))
-		return
-	}
 }
 
 func getCurrentChannel(user *discordgo.User, guild *discordgo.Guild, session *discordgo.Session) (*discordgo.Channel, error) {
