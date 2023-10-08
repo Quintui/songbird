@@ -83,7 +83,7 @@ func handleYoutubeCommand(session *discordgo.Session, message *discordgo.Message
 		return
 	}
 
-	currentChannel, err := getCurrentChannel(messageAuthor, guild, session)
+	authorCurrentChannel, err := getAuthorCurrentChannel(messageAuthor, guild, session)
 
 	if err != nil {
 		fmt.Println(err)
@@ -100,7 +100,7 @@ func handleYoutubeCommand(session *discordgo.Session, message *discordgo.Message
 
 	defer os.Remove(downloadedSong)
 
-	voiceConnection, err := session.ChannelVoiceJoin(currentChannel.GuildID, currentChannel.ID, false, true)
+	voiceConnection, err := session.ChannelVoiceJoin(authorCurrentChannel.GuildID, authorCurrentChannel.ID, false, true)
 
 	if err != nil {
 		fmt.Println(err)
@@ -110,15 +110,17 @@ func handleYoutubeCommand(session *discordgo.Session, message *discordgo.Message
 
 	voiceConnection.Speaking(true)
 
-	session.ChannelMessageSend(message.ChannelID, fmt.Sprintf("Hey, @%s, I found you video!!! %s", message.Author.Username, query))
+	session.ChannelMessageSend(message.ChannelID, fmt.Sprintf("Hey, @%s, I found your video!!! %s", message.Author.Username, query))
 
 	dgvoice.PlayAudioFile(voiceConnection, downloadedSong, make(chan bool))
+
+	voiceConnection.Speaking(false)
 
 	defer voiceConnection.Close()
 
 }
 
-func getCurrentChannel(user *discordgo.User, guild *discordgo.Guild, session *discordgo.Session) (*discordgo.Channel, error) {
+func getAuthorCurrentChannel(user *discordgo.User, guild *discordgo.Guild, session *discordgo.Session) (*discordgo.Channel, error) {
 	for _, voiceConnection := range guild.VoiceStates {
 
 		if voiceConnection.UserID == user.ID {
