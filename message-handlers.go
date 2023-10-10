@@ -84,6 +84,12 @@ func handleYoutubeCommand(session *discordgo.Session, message *discordgo.Message
 	}
 
 	authorCurrentChannel, err := getAuthorCurrentChannel(messageAuthor, guild, session)
+	// USER CANNOT Play 2 songs in a row need to restart the bot
+	// Think about streaming songs instead of saving them to disk
+	// Implement queue
+	// Implement pause/resume
+	// Implement skip
+	// Implement playing playlists
 
 	if err != nil {
 		fmt.Println(err)
@@ -112,7 +118,7 @@ func handleYoutubeCommand(session *discordgo.Session, message *discordgo.Message
 
 	session.ChannelMessageSend(message.ChannelID, fmt.Sprintf("Hey, @%s, I found your video!!! %s", message.Author.Username, query))
 
-	dgvoice.PlayAudioFile(voiceConnection, downloadedSong, make(chan bool))
+	dgvoice.PlayAudioFile(voiceConnection, downloadedSong, make(<-chan bool))
 
 	voiceConnection.Speaking(false)
 
