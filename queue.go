@@ -1,10 +1,5 @@
 package main
 
-// Add queue
-// get from queue
-// delete from queue
-//  queue clean
-
 func (v *VoiceInstance) GetQueueSong() (song Song) {
 	v.queueMutex.Lock()
 	defer v.queueMutex.Unlock()
@@ -21,7 +16,7 @@ func (v *VoiceInstance) AddQueue(song Song) {
 	v.queue = append(v.queue, song)
 }
 
-func (v *VoiceInstance) QueueRemoveFisrt() {
+func (v *VoiceInstance) QueueRemoveFirst() {
 	v.queueMutex.Lock()
 	defer v.queueMutex.Unlock()
 	if len(v.queue) != 0 {
