@@ -41,7 +41,6 @@ func handleMessage(session *discordgo.Session, message *discordgo.MessageCreate)
 	}
 
 	if strings.HasPrefix(messageContent, commandPrefix) {
-
 		command := strings.Replace(strings.Split(messageContent, " ")[0], commandPrefix, "", 1)
 		switch command {
 		case "play", "yt", "youtube":

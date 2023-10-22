@@ -34,6 +34,12 @@ github.com/gorilla/websocket
 # github.com/joho/godotenv v1.5.1
 ## explicit; go 1.12
 github.com/joho/godotenv
+# github.com/jonas747/dca v0.0.0-20210930103944-155f5e5f0cc7
+## explicit
+github.com/jonas747/dca
+# github.com/jonas747/ogg v0.0.0-20161220051205-b4f6f4cf3757
+## explicit
+github.com/jonas747/ogg
 # github.com/kkdai/youtube/v2 v2.9.0
 ## explicit; go 1.21
 github.com/kkdai/youtube/v2
