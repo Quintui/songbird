@@ -1,9 +1,9 @@
 package main
 
 import (
-	"sync"
-
 	"github.com/bwmarrin/discordgo"
+	"github.com/jonas747/dca"
+	"sync"
 )
 
 type Song struct {
@@ -16,6 +16,8 @@ type Song struct {
 type VoiceInstance struct {
 	voice      *discordgo.VoiceConnection
 	session    *discordgo.Session
+	encoder    *dca.EncodeSession
+	stream     *dca.StreamingSession
 	queueMutex *sync.Mutex
 	songMutex  *sync.Mutex
 	channelID  string
