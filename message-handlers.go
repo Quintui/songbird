@@ -2,64 +2,11 @@ package main
 
 import (
 	"fmt"
-	"io"
-	"log"
-	"net/url"
 	"os"
 
 	"github.com/bwmarrin/dgvoice"
 	"github.com/bwmarrin/discordgo"
-	"github.com/kkdai/youtube/v2"
 )
-
-type youtubeSong struct {
-	URL string
-}
-
-func (ys *youtubeSong) downloadVideo() (string, error) {
-
-	client := youtube.Client{}
-	parsedURL, err := url.Parse(ys.URL)
-	if err != nil {
-		log.Printf("Unable to decode url: %s, err: %v", ys.URL, err)
-		return "", err
-	}
-
-	videoID := parsedURL.Query().Get("v")
-	youtubeVideo, err := client.GetVideo(videoID)
-
-	if err != nil {
-		fmt.Println(err)
-		return "", err
-	}
-
-	formats := youtubeVideo.Formats.WithAudioChannels()
-
-	stream, _, err := client.GetStream(youtubeVideo, &formats[0])
-	if err != nil {
-		fmt.Println(err)
-		return "", err
-	}
-
-	fileName := fmt.Sprintf("%s.mp4", videoID)
-
-	file, err := os.Create(fileName)
-
-	if err != nil {
-		fmt.Println(err)
-		return "", err
-	}
-	defer file.Close()
-
-	_, err = io.Copy(file, stream)
-
-	if err != nil {
-		fmt.Println(err)
-		return "", err
-	}
-
-	return fileName, nil
-}
 
 func handleYoutubeCommand(session *discordgo.Session, message *discordgo.MessageCreate, query string) {
 	messageAuthor := message.Author
@@ -68,10 +15,6 @@ func handleYoutubeCommand(session *discordgo.Session, message *discordgo.Message
 		fmt.Println(err)
 		session.ChannelMessageSend(message.ChannelID, fmt.Sprintln("Error with getting a message channel"))
 		return
-	}
-
-	youtubeSong := youtubeSong{
-		URL: query,
 	}
 
 	guild, err := session.State.Guild(channel.GuildID)
@@ -96,7 +39,7 @@ func handleYoutubeCommand(session *discordgo.Session, message *discordgo.Message
 		return
 	}
 
-	downloadedSong, err := youtubeSong.downloadVideo()
+	downloadedSong, err := GetYoutubeVideo(query)
 
 	if err != nil {
 		fmt.Println(err)

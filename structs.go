@@ -1,9 +1,10 @@
 package main
 
 import (
+	"sync"
+
 	"github.com/bwmarrin/discordgo"
 	"github.com/jonas747/dca"
-	"sync"
 )
 
 type Song struct {
@@ -11,6 +12,11 @@ type Song struct {
 	Description string
 	ChannelId   string
 	VideoUrl    string
+}
+
+type PkgSong struct {
+	song Song
+	v    *VoiceInstance
 }
 
 type VoiceInstance struct {
