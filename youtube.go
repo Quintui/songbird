@@ -23,7 +23,7 @@ func GetYoutubeVideo(youtubeUrl string, voiceInstance VoiceInstance, message dis
 
 	if err != nil {
 		fmt.Println(err)
-		return PkgSong{}, err
+		return
 	}
 
 	formats := youtubeVideo.Formats.WithAudioChannels()
@@ -32,7 +32,7 @@ func GetYoutubeVideo(youtubeUrl string, voiceInstance VoiceInstance, message dis
 
 	if err != nil {
 		fmt.Println(err)
-		return PkgSong{}, err
+		return
 	}
 
 	song := Song{
@@ -42,10 +42,8 @@ func GetYoutubeVideo(youtubeUrl string, voiceInstance VoiceInstance, message dis
 		VideoUrl:    downloadedVideoUrl,
 	}
 
-	response := PkgSong{
-		v:    &voiceInstance,
-		song: song,
-	}
+	songStruct.v = &voiceInstance
+	songStruct.song = song
 
-	return response, nil
+	return
 }
