@@ -2,13 +2,12 @@ package main
 
 import (
 	"fmt"
-	"os"
 
-	"github.com/bwmarrin/dgvoice"
 	"github.com/bwmarrin/discordgo"
+	"github.com/jonas747/dca"
 )
 
-func handleYoutubeCommand(session *discordgo.Session, message *discordgo.MessageCreate, query string) {
+func handleYoutubeCommand(voiceInstance VoiceInstance, message *discordgo.MessageCreate) {
 	messageAuthor := message.Author
 	channel, err := session.State.Channel(message.ChannelID)
 	if err != nil {
@@ -39,15 +38,6 @@ func handleYoutubeCommand(session *discordgo.Session, message *discordgo.Message
 		return
 	}
 
-	downloadedSong, err := GetYoutubeVideo(query)
-
-	if err != nil {
-		fmt.Println(err)
-		return
-	}
-
-	defer os.Remove(downloadedSong)
-
 	voiceConnection, err := session.ChannelVoiceJoin(authorCurrentChannel.GuildID, authorCurrentChannel.ID, false, true)
 
 	if err != nil {
@@ -56,12 +46,14 @@ func handleYoutubeCommand(session *discordgo.Session, message *discordgo.Message
 		return
 	}
 
+	downloadedSong, err := GetYoutubeVideo(query, voiceConnection, *message)
+
 	voiceConnection.Speaking(true)
 
 	session.ChannelMessageSend(message.ChannelID, fmt.Sprintf("Hey, @%s, I found your video!!! %s", message.Author.Username, query))
 
-	dgvoice.PlayAudioFile(voiceConnection, downloadedSong, make(<-chan bool))
-
+	done := make(chan error)
+	dca.NewStream(source, vc, done)
 	voiceConnection.Speaking(false)
 
 	defer voiceConnection.Close()
