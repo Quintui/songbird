@@ -42,18 +42,21 @@ func handleMessage(session *discordgo.Session, message *discordgo.MessageCreate)
 
 	if strings.HasPrefix(messageContent, commandPrefix) {
 		command := strings.Replace(strings.Split(messageContent, " ")[0], commandPrefix, "", 1)
+
+		guildId := SearchGuildId(message.ChannelID)
+
+		voiceInstance := *voiceInstances[guildId]
+
 		switch command {
 		case "play", "yt", "youtube":
-			var query string
-			if splittedMessage := strings.Split(messageContent, " "); len(splittedMessage) < 2 {
-				session.ChannelMessageSend(message.ChannelID, fmt.Sprintf("@%s Bimbo... It looks like you forgot to put a LINK.", message.Author.Username))
-				return
-			}
-			query = strings.Replace(strings.Split(messageContent, " ")[1], commandPrefix, "", 1)
-
-			handleYoutubeCommand(session, message, query)
+			playReporter(voiceInstance, message)
 
 		}
 
 	}
+}
+
+func SearchGuildId(textChannelId string) string {
+	channel, _ := dgSession.Channel(textChannelId)
+	return channel.GuildID
 }
