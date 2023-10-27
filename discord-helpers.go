@@ -6,19 +6,20 @@ import (
 	"github.com/bwmarrin/discordgo"
 )
 
-func getAuthorCurrentChannel(user *discordgo.User, guild *discordgo.Guild, session *discordgo.Session) (*discordgo.Channel, error) {
-	for _, voiceConnection := range guild.VoiceStates {
+func getAuthorCurrentChannel(userId string) (*discordgo.Channel, error) {
+	for _, guild := range dgSession.State.Guilds {
+		for _, voice := range guild.VoiceStates {
+			if voice.UserID == userId {
+				channel, err := dgSession.State.Channel(voice.ChannelID)
 
-		if voiceConnection.UserID == user.ID {
-			channel, err := session.State.Channel(voiceConnection.ChannelID)
+				if err != nil {
+					return nil, err
+				}
 
-			if err != nil {
-				return nil, err
+				return channel, nil
 			}
-
-			return channel, nil
-
 		}
+
 	}
 
 	return nil, errors.New("there is no user in voice channels ")

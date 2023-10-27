@@ -45,7 +45,7 @@ func handleMessage(session *discordgo.Session, message *discordgo.MessageCreate)
 
 		guildId := SearchGuildId(message.ChannelID)
 
-		voiceInstance := *voiceInstances[guildId]
+		voiceInstance := voiceInstances[guildId]
 
 		switch command {
 		case "play", "yt", "youtube":

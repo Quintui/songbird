@@ -21,6 +21,7 @@ func (v *VoiceInstance) DCA(url string) {
 	done := make(chan error)
 	stream := dca.NewStream(encodeSession, v.voice, done)
 	v.stream = stream
+
 	for {
 		select {
 		case err := <-done:
