@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"log"
 	"os"
 	"os/signal"
 	"strings"
@@ -16,20 +15,17 @@ func main() {
 
 	config.Load()
 
-	ds, err := connect(config.Get().AccessToken)
+	dg = connect(config.Get().AccessToken)
 
-	if err != nil {
-		log.Fatalf("Something went wrong connecting to Discord: %s", err)
-	}
+	dg.AddHandler(handleMessage)
 
-	ds.AddHandler(handleMessage)
-
+	initRoutine()
 	// Wait here until CTRL-C or other term signal is received.
 	fmt.Println("Bot is now running.  Press CTRL-C to exit.")
 	sc := make(chan os.Signal, 1)
 	signal.Notify(sc, syscall.SIGINT, syscall.SIGTERM, os.Interrupt)
 	<-sc
-	ds.Close()
+	dg.Close()
 }
 
 func handleMessage(session *discordgo.Session, message *discordgo.MessageCreate) {
@@ -41,22 +37,25 @@ func handleMessage(session *discordgo.Session, message *discordgo.MessageCreate)
 	}
 
 	if strings.HasPrefix(messageContent, commandPrefix) {
+
 		command := strings.Replace(strings.Split(messageContent, " ")[0], commandPrefix, "", 1)
 
 		guildId := SearchGuildId(message.ChannelID)
 
-		voiceInstance := voiceInstances[guildId]
+		var voiceInstance *VoiceInstance
+
+		voiceInstance = voiceInstances[guildId]
+
+		if voiceInstance == nil {
+			CreateVoiceInstance(session, message)
+		}
+
+		voiceInstance = voiceInstances[guildId]
 
 		switch command {
 		case "play", "yt", "youtube":
 			playReporter(voiceInstance, message)
-
 		}
 
 	}
-}
-
-func SearchGuildId(textChannelId string) string {
-	channel, _ := dgSession.Channel(textChannelId)
-	return channel.GuildID
 }

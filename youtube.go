@@ -9,7 +9,7 @@ import (
 	"github.com/kkdai/youtube/v2"
 )
 
-func GetYoutubeVideo(youtubeUrl string, voiceInstance VoiceInstance, message discordgo.MessageCreate) (songStruct PkgSong, err error) {
+func GetYoutubeVideo(youtubeUrl string, voiceInstance *VoiceInstance, message discordgo.MessageCreate) (songStruct PkgSong, err error) {
 
 	client := youtube.Client{}
 	parsedURL, err := url.Parse(youtubeUrl)
@@ -42,7 +42,7 @@ func GetYoutubeVideo(youtubeUrl string, voiceInstance VoiceInstance, message dis
 		VideoUrl:    downloadedVideoUrl,
 	}
 
-	songStruct.v = &voiceInstance
+	songStruct.v = voiceInstance
 	songStruct.song = song
 
 	return

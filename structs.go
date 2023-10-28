@@ -24,11 +24,13 @@ type VoiceInstance struct {
 	session    *discordgo.Session
 	encoder    *dca.EncodeSession
 	stream     *dca.StreamingSession
-	queueMutex *sync.Mutex
-	songMutex  *sync.Mutex
-	channelID  string
+	queueMutex sync.Mutex
+	songMutex  sync.Mutex
+	// channelID  string
 	guildId    string
 	nowPlaying Song
+	stop       bool
+	skip       bool
 	pause      bool
 	queue      []Song
 	speaking   bool

@@ -1,10 +1,14 @@
 package main
 
-import "github.com/bwmarrin/discordgo"
+import (
+	"sync"
+
+	"github.com/bwmarrin/discordgo"
+)
 
 var (
-	dgSession      *discordgo.Session
+	dg             *discordgo.Session
 	voiceInstances = map[string]*VoiceInstance{}
 	songChan       = make(chan PkgSong)
-	// mutex          sync.Mutex
+	mutex          sync.Mutex
 )

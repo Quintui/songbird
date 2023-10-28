@@ -1,19 +1,25 @@
 package main
 
 import (
+	"log"
+
 	"github.com/bwmarrin/discordgo"
 )
 
-func connect(accessToken string) (*discordgo.Session, error) {
+func connect(accessToken string) *discordgo.Session {
 	discordgo.MakeIntent(discordgo.IntentsGuildVoiceStates)
 	ds, err := discordgo.New("Bot " + accessToken)
 
 	if err != nil {
-		return nil, err
+		log.Fatalf("Something went wrong connecting to Discord: %s", err)
 	}
 
 	err = ds.Open()
 
-	return ds, err
+	if err != nil {
+		log.Fatalf("Something went wrong connecting to Discord: %s", err)
+	}
+
+	return ds
 
 }
